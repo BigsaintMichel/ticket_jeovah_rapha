@@ -8,13 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        /* === Design Professionnel Final === */
+        /* === Styles (Code CSS Final) === */
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -35,7 +34,6 @@
             overflow: hidden;
         }
 
-        /* --- En-tête --- */
         .ticket-header {
             text-align: center;
             padding: 35px 40px 25px 40px;
@@ -87,7 +85,6 @@
         }
         .topics-preview { display: none; }
 
-        /* --- Corps (Formulaire & Confirmation) --- */
         .ticket-body { padding: 40px; }
         .form-group { margin-bottom: 20px; }
         .form-group label {
@@ -304,7 +301,8 @@
             </div>
             
             <div id="participantList">
-                </div>
+                
+            </div>
         </div>
 
     </div>
@@ -313,12 +311,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             
             // 1. URL de votre serveur Google Apps Script (LIEN FINAL CORRIGÉ)
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTsQ4nI1Bw5NVVEXrCiS1XB7o9J8ClHfco0TVbRfjNO0Yd13x08s4mBhU-xjg9mTNcpA/exec";
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbySk0RouszyaZugPFys3nL31NTUcC-JudLOzT7aMx9_BZjaVsb8bWXge7ZXrVHGcIA0Fg/exec";
 
-            // Initialiser jsPDF
             const { jsPDF } = window.jspdf;
 
-            // Variables
             const registrationForm = document.getElementById('registrationForm');
             const confirmationScreen = document.getElementById('confirmationScreen');
             const newRegistrationBtn = document.getElementById('newRegistrationBtn');
@@ -328,7 +324,6 @@
             const resetDataBtn = document.getElementById('resetDataBtn');
             const submitBtn = document.querySelector('.submit-btn');
             
-            // --- Logique du Formulaire (CONNECTÉE À GOOGLE) ---
             registrationForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
@@ -373,7 +368,6 @@
                     }
                 })
                 .catch(error => {
-                    // Cette erreur est capturée si la connexion au serveur échoue
                     console.error('Erreur Fetch:', error);
                     alert("Une erreur de connexion est survenue. Veuillez réessayer.");
                     submitBtn.disabled = false;
@@ -381,7 +375,6 @@
                 });
             });
 
-            // --- Logique des boutons Admin (Alertes) ---
             newRegistrationBtn.addEventListener('click', () => {
                 registrationForm.reset();
                 submitBtn.disabled = false;

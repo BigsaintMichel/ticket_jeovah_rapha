@@ -309,8 +309,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // 1. URL de votre serveur Google Apps Script (LIEN NOUVEAU ET PROPRE)
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-i6iYBA9jO2vGNTvwuMYD1dy8TK4yqhMGsbK7vCH1TLqnAb3Y3-wwcKWHTZYoWHLeFA/exec";
+            // 1. URL de votre serveur NETLIFY FUNCTION (CORRIGÉE)
+            const GOOGLE_SCRIPT_URL = "/.netlify/functions/ticket-generator";
 
             const { jsPDF } = window.jspdf;
 
@@ -336,15 +336,20 @@
 
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
+                    // mode: 'cors' n'est plus nécessaire avec Netlify Functions
                     cache: 'no-cache',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData),
-                    redirect: 'follow'
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        // Netlify renvoie une erreur HTTP 4xx ou 5xx
+                        throw new Error(`Erreur du serveur Netlify: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if(data.result === "success") {
                         document.getElementById('confNom').textContent = `${prenom} ${nom}`;
@@ -361,14 +366,16 @@
                         registrationForm.style.display = 'none';
                         confirmationScreen.style.display = 'block';
                     } else {
-                        alert("Une erreur est survenue lors de l'enregistrement: " + data.message);
+                        // Erreur logique renvoyée par la fonction Node.js
+                        alert("Erreur logique: " + data.message);
                         submitBtn.disabled = false;
                         submitBtn.textContent = "Générer mon Ticket";
                     }
                 })
                 .catch(error => {
+                    // Erreur de connexion (si Netlify est injoignable)
                     console.error('Erreur Fetch:', error);
-                    alert("Une erreur de connexion est survenue. Veuillez réessayer.");
+                    alert("ERREUR CRITIQUE. Veuillez vérifier le déploiement Netlify.");
                     submitBtn.disabled = false;
                     submitBtn.textContent = "Générer mon Ticket";
                 });
@@ -383,17 +390,17 @@
             });
 
             showListLink.addEventListener('click', () => {
-                alert("Pour voir la liste complète, veuillez ouvrir votre fichier Google Sheet.");
-                participantList.innerHTML = "<p>Votre liste d'administration est maintenant sur votre Google Sheet.</p>";
+                alert("La liste est consultable dans les Logs de votre administration Netlify.");
+                participantList.innerHTML = "<p>Veuillez consulter les Logs de la fonction Serverless dans votre compte Netlify.</p>";
                 participantList.style.display = (participantList.style.display === 'block') ? 'none' : 'block';
             });
             
             downloadPdfBtn.addEventListener('click', () => {
-                alert("Pour télécharger la liste, ouvrez votre Google Sheet et allez dans Fichier > Télécharger > PDF.");
+                alert("Les données sont enregistrées via Netlify, consultez les Logs ou un service de base de données que vous y avez lié.");
             });
 
             resetDataBtn.addEventListener('click', () => {
-                alert("Pour réinitialiser les données, vous devez vider les lignes de votre fichier Google Sheet manuellement (supprimez les lignes 2, 3, 4, etc.).");
+                alert("La réinitialisation des données se fait en gérant les Logs ou la base de données liée à Netlify.");
             });
         });
     </script>

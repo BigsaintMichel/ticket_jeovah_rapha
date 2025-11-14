@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Formation Jéhovah Rapha</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        /* Styles (quasi-inchangés) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .page-container {
+            max-width: 550px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .ticket-header {
+            text-align: center;
+            padding: 35px 40px 25px 40px;
+            border-bottom: 1px solid #eef2f7;
+        }
+        .logo-jr {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #C7A17A;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+            line-height: 1;
+            padding-bottom: 5px;
+        }
+        .logo-jr::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background-color: #C7A17A;
+            border-radius: 2px;
+        }
+        .ticket-header h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #555;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .ticket-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #1a2b4d;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+        .ticket-header .event-details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+        .topics-preview { display: none; }
+        .ticket-body { padding: 40px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #fcfcfc;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #003366;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+        .submit-btn {
+            width: 100%;
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+        .submit-btn:hover {
+            background-color: #002244;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 51, 102, 0.15);
+        }
+        #confirmationScreen { display: none; text-align: center; }
+        #confirmationScreen h2 {
+            font-family: 'Playfair Display', serif;
+            color: #2a9d8f;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        .ticket-wrapper {
+            border: 2px dashed #003366;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            background: #f9fcff;
+        }
+        .ticket-wrapper p { font-size: 1.1rem; color: #333; margin-bottom: 12px; }
+        .ticket-wrapper .label { font-weight: 600; color: #003366; }
+        .ticket-wrapper .ticket-number {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 3rem;
+            color: #C7A17A;
+            margin-bottom: 15px;
+        }
+        #qrcode {
+            width: 180px;
+            height: 180px;
+            margin: 20px auto 15px;
+            border: 5px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .reset-btn {
+            width: 100%;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+        }
+        .reset-btn:hover { background-color: #5a6268; }
+        .admin-section {
+            padding: 25px 40px 35px 40px;
+            text-align: center;
+            background-color: #fcfcfc;
+            border-top: 1px solid #eef2f7;
+        }
+        .admin-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px; /* Réduction de l'espace */
+            flex-wrap: wrap; /* Permet aux boutons de passer à la ligne sur petit écran */
+        }
+        .admin-link {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            color: #555;
+            cursor: pointer;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        .admin-link:hover { background-color: #eef2f7; color: #000; }
+        .admin-btn {
+            background-color: #C7A17A;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .admin-btn:hover { background-color: #b08d66; transform: translateY(-2px); }
+
+        /* === NOUVEAU : Style pour le bouton de réinitialisation === */
+        .admin-btn-warning {
+            background-color: #fff;
+            color: #d90429; /* Rouge (action destructive) */
+            border: 1px solid #d90429;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .admin-btn-warning:hover {
+            background-color: #d90429;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        
+        #participantList {
+            display: none;
+            margin-top: 0;
+            text-align: left;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eef2f7;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        #participantList table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        #participantList th, #participantList td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            text-align: left;
+            word-break: break-word;
+        }
+        #participantList th {
+            background-color: #eef2f7;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            color: #333;
+        }
+        #participantList tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        #participantList p { font-style: italic; color: #555; padding: 10px; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <div class="ticket-header">
+            <div class="logo-jr">JR</div> 
+            <h2>LE CABINET DE FORMATION</h2>
+            <h1>JÉHOVAH RAPHA</h1>
+            <p class="event-details">Samedi 15 Novembre 2025 • 08h30 • Hotel Astoria Palace</p>
+            <div class="topics-preview"></div>
+        </div>
+        
+        <div class="ticket-body">
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="nom">Nom :</label>
+                    <input type="text" id="nom" name="nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom :</label>
+                    <input type="text" id="prenom" name="prenom" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact (Tél/WhatsApp) :</label>
+                    <input type="tel" id="contact" name="contact" required>
+                </div>
+                <button type="submit" class="submit-btn">Générer mon Ticket</button>
+            </form>
+            <div id="confirmationScreen">
+                <h2>✅ Enregistré !</h2>
+                <p>Montrez ce ticket à l'entrée. Vous pouvez prendre une capture d'écran.</p>
+                <div class="ticket-wrapper">
+                    <p><span class="label">Participant :</span> <span id="confNom"></span></p>
+                    <p><span class="label">Ticket N° :</span></p>
+                    <h3 class="ticket-number" id="ticketNumber"></h3>
+                    <div id="qrcode"></div>
+                </div>
+                <button id="newRegistrationBtn" class="reset-btn">Enregistrer un autre participant</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="admin-controls">
+                <span id="showListLink" class="admin-link">Afficher/Masquer</span>
+                <button id="downloadPdfBtn" class="admin-btn">Télécharger PDF</button>
+                <button id="resetDataBtn" class="admin-btn-warning">Réinitialiser</button>
+            </div>
+            
+            <div id="participantList">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const { jsPDF } = window.jspdf;
+
+            // Variables
+            const registrationForm = document.getElementById('registrationForm');
+            const confirmationScreen = document.getElementById('confirmationScreen');
+            const newRegistrationBtn = document.getElementById('newRegistrationBtn');
+            const showListLink = document.getElementById('showListLink');
+            const participantList = document.getElementById('participantList');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const resetDataBtn = document.getElementById('resetDataBtn'); // NOUVEAU
+            
+            // Logique du Formulaire (inchangée)
+            registrationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nom = document.getElementById('nom').value;
+                const prenom = document.getElementById('prenom').value;
+                const contact = document.getElementById('contact').value;
+                
+                let currentTicketNumber = parseInt(localStorage.getItem('lastTicketNumber_JH')) || 0;
+                currentTicketNumber++;
+                localStorage.setItem('lastTicketNumber_JH', currentTicketNumber);
+                
+                const ticketNumberFormatted = currentTicketNumber.toString().padStart(3, '0');
+
+                let participants = JSON.parse(localStorage.getItem('allParticipants_JH')) || [];
+                const participantData = {
+                    ticket: ticketNumberFormatted,
+                    nom: nom,
+                    prenom: prenom,
+                    contact: contact,
+                    heure: new Date().toLocaleTimeString('fr-FR')
+                };
+                participants.push(participantData);
+                localStorage.setItem('allParticipants_JH', JSON.stringify(participants));
+
+                document.getElementById('confNom').textContent = `${prenom} ${nom}`;
+                document.getElementById('ticketNumber').textContent = ticketNumberFormatted;
+
+                document.getElementById('qrcode').innerHTML = ""; 
+                const qrText = `Ticket: ${ticketNumberFormatted}\nNom: ${prenom} ${nom}\nContact: ${contact}`;
+                new QRCode(document.getElementById("qrcode"), {
+                    text: qrText, width: 180, height: 180,
+                    colorDark : "#000000", colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                registrationForm.style.display = 'none';
+                confirmationScreen.style.display = 'block';
+            });
+
+            // Logique de Réinitialisation (inchangée)
+            newRegistrationBtn.addEventListener('click', () => {
+                registrationForm.reset();
+                confirmationScreen.style.display = 'none';
+                registrationForm.style.display = 'block';
+            });
+
+            // Fonction pour construire le tableau HTML (inchangée)
+            function buildParticipantTable() {
+                let participants = JSON.parse(localStorage.getItem('allParticipants_JH')) || [];
+                participantList.innerHTML = ''; 
+                if (participants.length === 0) {
+                    participantList.innerHTML = "<p>Aucun inscrit pour le moment.</p>";
+                } else {
+                    let tableHtml = '<table>';
+                    tableHtml += '<thead><tr><th>Ticket</th><th>Nom</th><th>Prénom</th><th>Contact</th><th>Heure</th></tr></thead>';
+                    tableHtml += '<tbody>';
+                    participants.forEach(p => { 
+                        tableHtml += `<tr>
+                            <td>${p.ticket}</td>
+                            <td>${p.nom}</td>
+                            <td>${p.prenom}</td>
+                            <td>${p.contact}</td>
+                            <td>${p.heure}</td>
+                        </tr>`;
+                    });
+                    tableHtml += '</tbody></table>';
+                    participantList.innerHTML = tableHtml;
+                }
+            }
+
+            // Logique Administrateur (inchangée)
+            showListLink.addEventListener('click', () => {
+                if (participantList.style.display === 'block') {
+                    participantList.style.display = 'none';
+                } else {
+                    buildParticipantTable();
+                    participantList.style.display = 'block';
+                }
+            });
+            
+            // Logique de TéléchargEMENT PDF (inchangée)
+            downloadPdfBtn.addEventListener('click', () => {
+                let participants = JSON.parse(localStorage.getItem('allParticipants_JH')) || [];
+                if (participants.length === 0) {
+                    alert("La liste des participants est vide.");
+                    return;
+                }
+                const doc = new jsPDF();
+                const tableColumns = ["Ticket", "Nom", "Prénom", "Contact", "Heure"];
+                const tableRows = participants.map(p => [ p.ticket, p.nom, p.prenom, p.contact, p.heure ]);
+
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text("Liste des Participants - Formation Jéhovah Rapha", 14, 22);
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Date de la formation: 15 Novembre 2025`, 14, 30);
+                doc.text(`Total des inscrits: ${participants.length}`, 14, 36);
+
+                doc.autoTable({
+                    head: [tableColumns],
+                    body: tableRows,
+                    startY: 45,
+                    theme: 'striped',
+                    headStyles: { fillColor: [0, 51, 102] },
+                    styles: { font: 'helvetica' }
+                });
+                doc.save('liste_participants.pdf');
+            });
+
+            // === NOUVEAU : Logique de Réinitialisation Sécurisée ===
+            resetDataBtn.addEventListener('click', () => {
+                const confirmationText = "RESET";
+                const userInput = prompt(`ATTENTION : Vous êtes sur le point de supprimer TOUTES les données (le compteur de tickets et la liste des inscrits).\n\nPour confirmer, veuillez taper le mot "${confirmationText}" en majuscules :`);
+
+                if (userInput === confirmationText) {
+                    // L'utilisateur a confirmé
+                    localStorage.setItem('lastTicketNumber_JH', 0);
+                    localStorage.setItem('allParticipants_JH', JSON.stringify([]));
+                    alert("✅ Données réinitialisées avec succès ! Le compteur est à 0.");
+                    // Recharger la page pour vider le tableau affiché
+                    location.reload();
+                } else if (userInput !== null) {
+                    // L'utilisateur a tapé le mauvais mot de passe
+                    alert("❌ Code incorrect. La réinitialisation a été annulée.");
+                }
+                // Si userInput est null (l'utilisateur a cliqué sur "Annuler"), ne rien faire.
+            });
+
+        });
+    </script>
+
+</body>
+</html>

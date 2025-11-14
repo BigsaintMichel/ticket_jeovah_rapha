@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
@@ -36,7 +35,7 @@
             overflow: hidden;
         }
 
-        /* --- En-tête de la carte --- */
+        /* --- En-tête --- */
         .ticket-header {
             text-align: center;
             padding: 35px 40px 25px 40px;
@@ -86,7 +85,7 @@
             margin-bottom: 0;
             line-height: 1.6;
         }
-        .topics-preview { display: none; } /* Cache les icônes */
+        .topics-preview { display: none; }
 
         /* --- Corps (Formulaire & Confirmation) --- */
         .ticket-body { padding: 40px; }
@@ -138,8 +137,6 @@
             background-color: #5a6268;
             cursor: not-allowed;
         }
-
-        /* --- Écran de Confirmation --- */
         #confirmationScreen { display: none; text-align: center; }
         #confirmationScreen h2 {
             font-family: 'Playfair Display', serif;
@@ -241,10 +238,9 @@
             color: #fff;
             transform: translateY(-2px);
         }
-        
         #participantList {
             display: none;
-            margin-top: 20px; /* Espace ajouté pour le tableau */
+            margin-top: 20px;
             text-align: left;
             background: #fff;
             padding: 15px;
@@ -253,7 +249,7 @@
             max-height: 300px;
             overflow-y: auto;
         }
-        #participantList table { display: none; } /* Caché, car on n'utilise plus localStorage */
+        #participantList table { display: none; }
         #participantList p { font-style: italic; color: #555; padding: 10px; }
         
     </style>
@@ -316,10 +312,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // 1. URL de votre serveur Google Apps Script
+            // 1. URL de votre serveur Google Apps Script (LIEN FINAL CORRIGÉ)
             const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTsQ4nI1Bw5NVVEXrCiS1XB7o9J8ClHfco0TVbRfjNO0Yd13x08s4mBhU-xjg9mTNcpA/exec";
 
-            // Initialiser jsPDF (nécessaire pour la déclaration)
+            // Initialiser jsPDF
             const { jsPDF } = window.jspdf;
 
             // Variables
@@ -377,6 +373,7 @@
                     }
                 })
                 .catch(error => {
+                    // Cette erreur est capturée si la connexion au serveur échoue
                     console.error('Erreur Fetch:', error);
                     alert("Une erreur de connexion est survenue. Veuillez réessayer.");
                     submitBtn.disabled = false;
@@ -384,7 +381,7 @@
                 });
             });
 
-            // --- Logique de Réinitialisation (pour le formulaire local) ---
+            // --- Logique des boutons Admin (Alertes) ---
             newRegistrationBtn.addEventListener('click', () => {
                 registrationForm.reset();
                 submitBtn.disabled = false;
@@ -393,12 +390,8 @@
                 registrationForm.style.display = 'block';
             });
 
-
-            // === MODIFICATION : Les boutons admin pointent vers le Google Sheet ===
-            
             showListLink.addEventListener('click', () => {
                 alert("Pour voir la liste complète, veuillez ouvrir votre fichier Google Sheet.");
-                // Affiche un message là où était le tableau
                 participantList.innerHTML = "<p>Votre liste d'administration est maintenant sur votre Google Sheet.</p>";
                 participantList.style.display = (participantList.style.display === 'block') ? 'none' : 'block';
             });
